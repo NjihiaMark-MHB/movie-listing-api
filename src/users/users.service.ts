@@ -41,6 +41,31 @@ export class UsersService {
     }
   }
 
+  async getUserById(id: number) {
+    try {
+      const user = await this.database
+        .select()
+        .from(schema.users)
+        .where(eq(schema.users.id, id))
+        .limit(1);
+      if (!user[0]) {
+        throw new NotFoundException('User not found');
+      }
+      return user[0];
+    } catch (error) {
+      console.error('Failed to fetch user:', {
+        error: error.message,
+        id,
+        stack: error.stack,
+      });
+      if (error.code === '42P01') {
+        // relation does not exist
+        throw new InternalServerErrorException('Database configuration error');
+      }
+      throw new InternalServerErrorException('An unexpected error occurred');
+    }
+  }
+
   async getUserByEmail(email: string) {
     try {
       const user = await this.database
