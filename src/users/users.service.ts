@@ -94,4 +94,21 @@ export class UsersService {
       throw new InternalServerErrorException('An unexpected error occurred');
     }
   }
+
+  async getUsers() {
+    try {
+      const users = await this.database.select().from(schema.users);
+      return users;
+    } catch (error) {
+      console.error('Failed to fetch users:', {
+        error: error.message,
+        stack: error.stack,
+      });
+      if (error.code === '42P01') {
+        // relation does not exist
+        throw new InternalServerErrorException('Database configuration error');
+      }
+      throw new InternalServerErrorException('An unexpected error occurred');
+    }
+  }
 }
