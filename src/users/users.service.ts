@@ -11,6 +11,7 @@ import { hash } from 'bcryptjs';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { CreateUserRequest } from './dto/create-user.request';
 import { eq } from 'drizzle-orm';
+import { UpdateUserRequest } from './dto/update-user.request';
 
 @Injectable()
 export class UsersService {
@@ -108,6 +109,43 @@ export class UsersService {
         // relation does not exist
         throw new InternalServerErrorException('Database configuration error');
       }
+      throw new InternalServerErrorException('An unexpected error occurred');
+    }
+  }
+
+  async updateUser(id: number, updateData: Partial<UpdateUserRequest>) {
+    try {
+      // If password is included, hash it
+      if (updateData.password) {
+        updateData.password = await hash(updateData.password, 10);
+      }
+
+      const updatedUser = await this.database
+        .update(schema.users)
+        .set(updateData)
+        .where(eq(schema.users.id, id))
+        .returning();
+
+      if (!updatedUser[0]) {
+        throw new NotFoundException('User not found');
+      }
+
+      return updatedUser[0];
+    } catch (error) {
+      console.error('Failed to update user:', {
+        error: error.message,
+        id,
+        stack: error.stack,
+      });
+
+      if (error.code === '23505') {
+        throw new ConflictException('Email already exists');
+      }
+
+      if (error.code === '42P01') {
+        throw new InternalServerErrorException('Database configuration error');
+      }
+
       throw new InternalServerErrorException('An unexpected error occurred');
     }
   }
