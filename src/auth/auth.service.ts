@@ -14,7 +14,11 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async login(user: typeof schema.users.$inferSelect, response: Response) {
+  async login(
+    user: typeof schema.users.$inferSelect,
+    response: Response,
+    redirect = false,
+  ) {
     try {
       const expirationMs = parseInt(
         this.configService.getOrThrow('JWT_ACCESS_TOKEN_EXPIRATION_MS'),
@@ -59,6 +63,10 @@ export class AuthService {
         secure: this.configService.get('NODE_ENV') === 'production',
         expires: expiresRefreshToken,
       });
+
+      if (redirect) {
+        response.redirect(this.configService.getOrThrow('AUTH_UI_REDIRECT'));
+      }
     } catch (error) {
       console.error('Login error:', {
         error: error.message,
@@ -88,7 +96,7 @@ export class AuthService {
   async verifyUserRefreshToken(
     refreshToken: string,
     userId: number,
-  ): Promise<typeof schema.users.$inferSelect> {
+  ): Promise<Omit<typeof schema.users.$inferSelect, 'password'>> {
     try {
       const user = await this.usersService.getUserById(userId);
       const refreshTokenMatches = await compare(

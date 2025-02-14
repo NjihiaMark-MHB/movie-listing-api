@@ -1,10 +1,11 @@
-import { Controller, UseGuards, Post, Res, Inject } from '@nestjs/common';
+import { Controller, UseGuards, Post, Res, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { Response } from 'express';
 import { CurrentUser } from './current-user.decorator';
 import * as schema from '../users/schema';
 import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
+import { GoogleAuthGuard } from './guards/google-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -26,5 +27,18 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     await this.authService.login(user, response);
+  }
+
+  @Get('google')
+  @UseGuards(GoogleAuthGuard)
+  loginGoogle() {}
+
+  @Get('google/callback')
+  @UseGuards(GoogleAuthGuard)
+  async loginGoogleCallback(
+    @CurrentUser() user: typeof schema.users.$inferSelect,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    await this.authService.login(user, response, true);
   }
 }

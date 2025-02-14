@@ -45,7 +45,13 @@ export class UsersService {
   async getUserById(id: number) {
     try {
       const user = await this.database
-        .select()
+        .select({
+          id: schema.users.id,
+          email: schema.users.email,
+          firstName: schema.users.firstName,
+          lastName: schema.users.lastName,
+          refreshToken: schema.users.refreshToken,
+        })
         .from(schema.users)
         .where(eq(schema.users.id, id))
         .limit(1);
@@ -74,10 +80,6 @@ export class UsersService {
         .from(schema.users)
         .where(eq(schema.users.email, email))
         .limit(1);
-
-      if (!user[0]) {
-        throw new NotFoundException('User not found');
-      }
 
       return user[0];
     } catch (error) {
@@ -147,6 +149,27 @@ export class UsersService {
       }
 
       throw new InternalServerErrorException('An unexpected error occurred');
+    }
+  }
+
+  async getOrCreateUser(user: CreateUserRequest) {
+    try {
+      const existingUser = await this.getUserByEmail(user.email);
+      if (existingUser) {
+        return existingUser;
+      } else {
+        await this.createUser(user);
+        return this.getUserByEmail(user.email);
+      }
+    } catch (error) {
+      console.error('Failed to get or create user:', {
+        error: error.message,
+        email: user.email,
+        stack: error.stack,
+      });
+      throw new InternalServerErrorException(
+        'An unexpected error occurred while getting or creating user',
+      );
     }
   }
 }
