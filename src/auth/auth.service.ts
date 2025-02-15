@@ -112,4 +112,20 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token is not valid');
     }
   }
+
+  async signOut(userId: number, response: Response) {
+    try {
+      await this.usersService.updateUser(userId, { refreshToken: null });
+      response.clearCookie('Authentication');
+      response.clearCookie('Refresh');
+      response.redirect(this.configService.getOrThrow('AUTH_UI_REDIRECT'));
+    } catch (error) {
+      console.error('Sign out error:', {
+        error: error.message,
+        userId,
+        stack: error.stack,
+      });
+      throw new UnauthorizedException('Failed to process sign out');
+    }
+  }
 }

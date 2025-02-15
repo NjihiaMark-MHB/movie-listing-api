@@ -6,6 +6,7 @@ import { CurrentUser } from './current-user.decorator';
 import * as schema from '../users/schema';
 import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -40,5 +41,14 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     await this.authService.login(user, response, true);
+  }
+
+  @Post('signout')
+  @UseGuards(JwtAuthGuard)
+  async signOut(
+    @CurrentUser() user: typeof schema.users.$inferSelect,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    await this.authService.signOut(user.id, response);
   }
 }
