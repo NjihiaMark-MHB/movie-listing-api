@@ -118,7 +118,7 @@ export class AuthService {
       await this.usersService.updateUser(userId, { refreshToken: null });
       response.clearCookie('Authentication');
       response.clearCookie('Refresh');
-      response.redirect(this.configService.getOrThrow('AUTH_UI_REDIRECT'));
+      response.status(200).json({ message: 'Successfully signed out' });
     } catch (error) {
       console.error('Sign out error:', {
         error: error.message,
