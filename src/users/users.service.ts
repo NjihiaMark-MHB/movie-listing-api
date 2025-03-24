@@ -51,6 +51,7 @@ export class UsersService {
           firstName: schema.users.firstName,
           lastName: schema.users.lastName,
           refreshToken: schema.users.refreshToken,
+          userAvatar: schema.users.userAvatar,
         })
         .from(schema.users)
         .where(eq(schema.users.id, id))

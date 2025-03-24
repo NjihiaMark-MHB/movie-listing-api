@@ -1,4 +1,4 @@
-import { IsEmail, IsStrongPassword } from 'class-validator';
+import { IsEmail, IsStrongPassword, IsNotEmpty } from 'class-validator';
 
 export class CreateUserRequest {
   @IsEmail(undefined, {
@@ -12,6 +12,10 @@ export class CreateUserRequest {
   })
   password: string;
 
+  @IsNotEmpty({ message: 'First name is required' })
   firstName: string;
+
+  @IsNotEmpty({ message: 'Last name is required' })
   lastName: string;
+  userAvatar?: string;
 }

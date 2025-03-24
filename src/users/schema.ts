@@ -7,4 +7,5 @@ export const users = pgTable('users', {
   firstName: text('firstName'),
   lastName: text('lastName'),
   refreshToken: text('refreshToken'),
+  userAvatar: text('userAvatar'),
 });

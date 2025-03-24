@@ -48,6 +48,13 @@ export class AuthService {
         )}ms`,
       });
 
+      const userData = {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      };
+
       await this.usersService.updateUser(user.id, {
         refreshToken: await hash(refreshToken, 10),
       });
@@ -65,8 +72,12 @@ export class AuthService {
       });
 
       if (redirect) {
-        response.redirect(this.configService.getOrThrow('AUTH_UI_REDIRECT'));
+        return response.redirect(
+          this.configService.getOrThrow('AUTH_UI_REDIRECT'),
+        );
       }
+
+      return response.json(userData);
     } catch (error) {
       console.error('Login error:', {
         error: error.message,
