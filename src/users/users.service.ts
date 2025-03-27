@@ -12,6 +12,8 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { CreateUserRequest } from './dto/create-user.request';
 import { eq } from 'drizzle-orm';
 import { UpdateUserRequest } from './dto/update-user.request';
+import { uuid } from 'drizzle-orm/pg-core';
+import { create } from 'domain';
 
 @Injectable()
 export class UsersService {
@@ -42,16 +44,53 @@ export class UsersService {
     }
   }
 
+  async getUserByUUId(id: string) {
+    try {
+      const user = await this.database
+        .select({
+          id: schema.users.id,
+          uuid: schema.users.uuid,
+          email: schema.users.email,
+          firstName: schema.users.firstName,
+          lastName: schema.users.lastName,
+          userAvatar: schema.users.userAvatar,
+          createdAt: schema.users.createdAt,
+          updatedAt: schema.users.updatedAt,
+        })
+        .from(schema.users)
+        .where(eq(schema.users.uuid, id))
+        .limit(1);
+      if (!user[0]) {
+        throw new NotFoundException('User not found');
+      }
+      return user[0];
+    } catch (error) {
+      console.error('Failed to fetch user:', {
+        error: error.message,
+        id,
+        stack: error.stack,
+      });
+      if (error.code === '42P01') {
+        // relation does not exist
+        throw new InternalServerErrorException('Database configuration error');
+      }
+      throw new InternalServerErrorException('An unexpected error occurred');
+    }
+  }
+
   async getUserById(id: number) {
     try {
       const user = await this.database
         .select({
           id: schema.users.id,
+          uuid: schema.users.uuid,
           email: schema.users.email,
           firstName: schema.users.firstName,
           lastName: schema.users.lastName,
           refreshToken: schema.users.refreshToken,
           userAvatar: schema.users.userAvatar,
+          createdAt: schema.users.createdAt,
+          updatedAt: schema.users.updatedAt,
         })
         .from(schema.users)
         .where(eq(schema.users.id, id))

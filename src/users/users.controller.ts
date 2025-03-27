@@ -1,9 +1,7 @@
-import { Controller, Body, Post, Get, UseGuards } from '@nestjs/common';
+import { Controller, Body, Post, Get, UseGuards, Param } from '@nestjs/common';
 import { CreateUserRequest } from './dto/create-user.request';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { CurrentUser } from 'src/auth/current-user.decorator';
-import * as schema from '../users/schema';
 
 @Controller('users')
 export class UsersController {
@@ -16,8 +14,13 @@ export class UsersController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  async getUsers(@CurrentUser() user: typeof schema.users.$inferSelect) {
-    console.log('user', user);
+  async getUsers() {
     return this.usersService.getUsers();
+  }
+
+  @Get('uuid/:uuid')
+  @UseGuards(JwtAuthGuard)
+  async getUserbyUUID(@Param('uuid') userId: string) {
+    return this.usersService.getUserByUUId(userId);
   }
 }

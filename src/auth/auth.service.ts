@@ -5,6 +5,7 @@ import { Response } from 'express';
 import { compare, hash } from 'bcryptjs';
 import { UsersService } from '../users/users.service';
 import * as schema from '../users/schema';
+import { uuid } from 'drizzle-orm/pg-core';
 
 @Injectable()
 export class AuthService {
@@ -50,9 +51,13 @@ export class AuthService {
 
       const userData = {
         id: user.id,
+        uuid: user.uuid,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
+        avatar: user.userAvatar,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
       };
 
       await this.usersService.updateUser(user.id, {
@@ -72,11 +77,12 @@ export class AuthService {
       });
 
       if (redirect) {
-        return response.redirect(
+        const redirectUrl = new URL(
           this.configService.getOrThrow('AUTH_UI_REDIRECT'),
         );
+        redirectUrl.searchParams.append('userId', user.uuid);
+        return response.redirect(redirectUrl.toString());
       }
-
       return response.json(userData);
     } catch (error) {
       console.error('Login error:', {
