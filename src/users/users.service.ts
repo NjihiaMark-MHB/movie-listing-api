@@ -12,8 +12,6 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { CreateUserRequest } from './dto/create-user.request';
 import { eq } from 'drizzle-orm';
 import { UpdateUserRequest } from './dto/update-user.request';
-import { uuid } from 'drizzle-orm/pg-core';
-import { create } from 'domain';
 
 @Injectable()
 export class UsersService {

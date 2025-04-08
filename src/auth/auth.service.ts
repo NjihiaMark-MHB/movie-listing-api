@@ -5,7 +5,6 @@ import { Response } from 'express';
 import { compare, hash } from 'bcryptjs';
 import { UsersService } from '../users/users.service';
 import * as schema from '../users/schema';
-import { uuid } from 'drizzle-orm/pg-core';
 
 @Injectable()
 export class AuthService {
